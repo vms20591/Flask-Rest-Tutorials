@@ -12,28 +12,28 @@ auth=HTTPBasicAuth(app)
 
 tasks=[
 		{
-			'id':1,
-			'title':'Do Something',
-			'description':'Do Something useful once in your life',
-			'done':True,
+			"id":1,
+			"title":"Learn Python",
+			"description":"Learn basics of python",
+			"status":True,
 		},
 		{
-			'id':2,
-			'title':'Dont\'t Do Something',
-			'description':'Do Something useful once in your life',
-			'done':False,
+			"id":2,
+			"title":"Learn JQuery",
+			"description":"Learn basics of JQuery",
+			"status":False,
 		},
 		{
-			'id':3,
-			'title':'Please Do Something',
-			'description':'Do Something useful once in your life',
-			'done':True,
+			"id":3,
+			"title":"Learn GO",
+			"description":"Learn basics of GO",
+			"status":True,
 		},
 	]
 	
 def make_uri(task,endpoint):
-	if 'id' in task and not 'uri' in task:
-		task.setdefault('uri',url_for(endpoint,taskid=task['id'],_external=True))
+	if "id" in task and not "uri" in task:
+		task.setdefault("uri",url_for(endpoint,taskid=task["id"],_external=True))
 
 	return task
 	
@@ -42,11 +42,20 @@ def get_password(username):
 	if username=='vms20591':
 		return 'password'	
 	
-@app.route('/api/v1.0/todo/tasks',methods=['GET','POST'])
+@app.route('/api/v1.0/todo/tasks',methods=['GET','POST','OPTIONS'])
 @auth.login_required
 def task_list_API():
+
+	if request.method=='OPTIONS':
+		resp=make_response()
+		resp.headers.setdefault('Access-Control-Allow-Origin','*')
+		resp.headers.setdefault('Access-Control-Allow-Methods','GET,POST')
+		resp.headers.setdefault('Access-Control-Allow-Headers','authorization,content-type')		
+		resp.headers.setdefault('Access-Control-Allow-Credentials','true')
+		return resp
+		
 	if request.method=='GET':
-		return make_response(jsonify({'tasks':[make_uri(task,'tasksAPI') for task in tasks]}),200)
+		return make_response(jsonify({"tasks":[make_uri(task,'tasksAPI') for task in tasks]}),200)
 		
 	if request.method=='POST':
 		if not request.json or not 'title' in request.json:
@@ -133,6 +142,6 @@ def login_errorhandler():
 		'errorcode':403,
 		'errorreason':'Not Authorized',
 	}),403)
-			
+
 if __name__=='__main__':
 	app.run(debug=True)
